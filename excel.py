@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 # Set OpenAI API key
-openai.api_key = os.getenv("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")
+openai.api_key = os.getenv(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)
 
 st.title("📊 엑셀 데이터 분석, 시각화 및 GPT 피드백 생성기 📝")
 
