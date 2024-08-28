@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import openai
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import os
 
@@ -8,9 +9,9 @@ import os
 load_dotenv()
 
 # Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("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")
 
-st.title("📊 엑셀 데이터 분석 및 GPT 피드백 생성기 📝")
+st.title("📊 엑셀 데이터 분석, 시각화 및 GPT 피드백 생성기 📝")
 
 # Initialize session state for messages and analysis chain
 if "messages" not in st.session_state:
@@ -74,6 +75,38 @@ def query_openai(prompt, model="gpt-3.5-turbo"):
     )
     return response.choices[0].message["content"]
 
+# Function to visualize the data
+def visualize_data(df):
+    st.write("### 데이터 시각화:")
+
+    # 기본 통계 시각화
+    st.write("#### 데이터 분포 히스토그램:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
+    if numeric_columns:
+        selected_column = st.selectbox("열 선택", numeric_columns)
+        plt.figure(figsize=(10, 6))
+        plt.hist(df[selected_column], bins=20, color='skyblue', edgecolor='black')
+        plt.title(f'{selected_column}의 분포')
+        plt.xlabel(selected_column)
+        plt.ylabel('Frequency')
+        st.pyplot(plt)
+    else:
+        st.write("수치 데이터가 없습니다.")
+
+    # 상관관계 히트맵
+    st.write("#### 상관관계 히트맵:")
+    if len(numeric_columns) > 1:
+        correlation_matrix = df.corr()
+        plt.figure(figsize=(10, 6))
+        plt.imshow(correlation_matrix, cmap='coolwarm', interpolation='nearest')
+        plt.colorbar()
+        plt.xticks(range(len(correlation_matrix.columns)), correlation_matrix.columns, rotation=45)
+        plt.yticks(range(len(correlation_matrix.columns)), correlation_matrix.columns)
+        plt.title("상관관계 히트맵")
+        st.pyplot(plt)
+    else:
+        st.write("상관관계를 시각화할 수 있는 충분한 수치 데이터가 없습니다.")
+
 # Process the uploaded file and generate analysis and feedback
 if uploaded_file:
     df = analyze_excel(uploaded_file)
@@ -96,6 +129,9 @@ if uploaded_file:
     # Save the GPT response in session state
     st.session_state["analysis_chain"] = gpt_response
 
+    # Visualize the data
+    visualize_data(df)
+
 # Clear previous messages if the button is clicked
 if clear_btn:
     st.session_state["messages"] = []
@@ -108,6 +144,7 @@ if update_btn and uploaded_file:
     prompt = create_prompt(data_summary)
     gpt_response = query_openai(prompt, model=selected_model)
     st.session_state["analysis_chain"] = gpt_response
+    visualize_data(df)
 
 # Display previous messages
 print_messages()
