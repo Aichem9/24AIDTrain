@@ -9,6 +9,9 @@ uploaded_file = st.file_uploader("분석할 Excel 파일을 업로드하세요",
 
 if uploaded_file:
     try:
+        # 필요한 라이브러리가 설치되었는지 확인
+        import openpyxl
+        
         # Excel 파일 읽기
         df = pd.read_excel(uploaded_file, sheet_name=None)  # 모든 시트를 읽어옴
         sheet_names = list(df.keys())  # 시트 이름 가져오기
@@ -55,6 +58,9 @@ if uploaded_file:
 
         else:
             st.warning(f"'{sheet_select}' 시트에는 데이터가 없습니다.")
+
+    except ImportError:
+        st.error("필수 라이브러리 'openpyxl'이 설치되지 않았습니다. 터미널에서 다음 명령어를 사용하여 설치해주세요: `pip install openpyxl`")
 
     except Exception as e:
         st.error(f"파일을 처리하는 중 오류가 발생했습니다: {e}")
