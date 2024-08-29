@@ -2,23 +2,22 @@ import streamlit as st
 import pandas as pd
 
 # Streamlit 앱 설정
-st.set_page_config(page_title="성적 대시보드", layout="wide")
+st.set_page_config(page_title="2024 AIDT 전문가 연수 성취도 성적 분석 대시보드", layout="wide")
+
+# 대시보드 제목 및 설명
+st.title("2024 AIDT 전문가 연수 성취도 성적 분석 대시보드")
+st.write("업로드한 CSV 파일을 기반으로 데이터 분석과 시각화를 제공합니다. 먼저 분석할 파일을 업로드하세요.")
 
 # 파일 업로드
-uploaded_file = st.file_uploader("분석할 Excel 파일을 업로드하세요", type=["xlsx"])
+uploaded_file = st.file_uploader("분석할 CSV 파일을 업로드하세요", type=["csv"])
 
 if uploaded_file:
     try:
-        # 엑셀 파일을 CSV로 변환하여 판다스로 읽기
-        excel_data = pd.ExcelFile(uploaded_file)  # 파일을 메모리에 로드
-        sheet_names = excel_data.sheet_names  # 시트 이름 가져오기
-
-        # 시트 선택
-        sheet_select = st.sidebar.selectbox("분석할 시트를 선택하세요", sheet_names)
-        data = pd.read_csv(excel_data.parse(sheet_select).to_csv(index=False))  # 시트를 CSV로 변환 후 읽기
+        # CSV 파일 읽기
+        data = pd.read_csv(uploaded_file)  # CSV 파일을 판다스로 읽기
 
         # 데이터 미리보기
-        st.write(f"### '{sheet_select}' 시트의 데이터 미리보기")
+        st.write("### 데이터 미리보기")
         st.dataframe(data.head())
 
         # 데이터 통계 정보
@@ -54,10 +53,10 @@ if uploaded_file:
                 st.warning("선택할 수 있는 숫자형 컬럼이 없습니다.")
 
         else:
-            st.warning(f"'{sheet_select}' 시트에는 데이터가 없습니다.")
+            st.warning("데이터가 비어 있습니다.")
 
     except Exception as e:
         st.error(f"파일을 처리하는 중 오류가 발생했습니다: {e}")
 
 else:
-    st.info("분석할 파일을 업로드해주세요.")
+    st.info("분석할 CSV 파일을 업로드해주세요.")
