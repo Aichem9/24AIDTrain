@@ -9,16 +9,13 @@ uploaded_file = st.file_uploader("분석할 Excel 파일을 업로드하세요",
 
 if uploaded_file:
     try:
-        # 필요한 라이브러리가 설치되었는지 확인
-        import openpyxl
-        
-        # Excel 파일 읽기
-        df = pd.read_excel(uploaded_file, sheet_name=None)  # 모든 시트를 읽어옴
-        sheet_names = list(df.keys())  # 시트 이름 가져오기
+        # 엑셀 파일을 CSV로 변환하여 판다스로 읽기
+        excel_data = pd.ExcelFile(uploaded_file)  # 파일을 메모리에 로드
+        sheet_names = excel_data.sheet_names  # 시트 이름 가져오기
 
         # 시트 선택
         sheet_select = st.sidebar.selectbox("분석할 시트를 선택하세요", sheet_names)
-        data = df[sheet_select]  # 선택한 시트의 데이터 가져오기
+        data = pd.read_csv(excel_data.parse(sheet_select).to_csv(index=False))  # 시트를 CSV로 변환 후 읽기
 
         # 데이터 미리보기
         st.write(f"### '{sheet_select}' 시트의 데이터 미리보기")
@@ -58,9 +55,6 @@ if uploaded_file:
 
         else:
             st.warning(f"'{sheet_select}' 시트에는 데이터가 없습니다.")
-
-    except ImportError:
-        st.error("필수 라이브러리 'openpyxl'이 설치되지 않았습니다. 터미널에서 다음 명령어를 사용하여 설치해주세요: `pip install openpyxl`")
 
     except Exception as e:
         st.error(f"파일을 처리하는 중 오류가 발생했습니다: {e}")
